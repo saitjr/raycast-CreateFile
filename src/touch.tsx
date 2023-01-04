@@ -1,4 +1,5 @@
 import { Action, ActionPanel, List, showToast, Toast, closeMainWindow } from "@raycast/api";
+import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getFileList, IFile } from "./file_reader";
 import { execCmd } from "./script";
@@ -28,7 +29,8 @@ function OpenFileAction(props: { item: IFile }) {
   );
 }
 
-function StoryListItem(props: { item: IFile; index: number }) {
+function StoryListItem(props: { item: IFile; index: number; search: string }) {
+  console.log(props.search);
   return (
     <List.Item
       title={props.item.name ?? "No title"}
@@ -44,9 +46,12 @@ function StoryListItem(props: { item: IFile; index: number }) {
 
 export default function Command() {
   const [state, setState] = useState<State>({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     async function fetchStories() {
+      console.log(searchTerm);
+
       try {
         const items = await getFileList("/Users/tangjiarong/Desktop");
         setState({ items: items });
@@ -60,13 +65,19 @@ export default function Command() {
     fetchStories();
   }, []);
 
-  console.log(state.items); // Prints stories
+  // console.log(state.items); // Prints stories
 
   return (
     <List isLoading={!state.items && !state.error}>
       {state.items?.map((item, index) => (
-        <StoryListItem key={item.name} item={item} index={index} />
+        <StoryListItem key={item.name} item={item} index={index} search={searchTerm} />
       ))}
     </List>
+
+    // <List isLoading={!state.items && !state.error} onSearchTextChange={setSearchTerm} throttle>
+    // {state.items?.map((item, index) => (
+    //   <StoryListItem key={item.name} item={item} index={index} search={searchTerm} />
+    // ))}
+    // </List>
   );
 }
